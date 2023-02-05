@@ -48,14 +48,78 @@ class PessoaController {
     }
 
     static async deletarPessoa(req, res) {
-        const {id} = req.params
+        const { id } = req.params
         const nome = req.body['nome'];
         try {
-            await database.Pessoas.destroy({where: {
-                id: Number(id)
-            }})
+            await database.Pessoas.destroy({
+                where: {
+                    id: Number(id)
+                }
+            })
             return res.status(200).send(`${nome} foi deletada com sucesso`)
+        } catch (error) {
+            return res.status(500).json(error.message);
+        }
+    }
+
+    static async getMatricula(req, res) {
+        const { estudanteId, matriculaId } = req.params;
+        try {
+            const umaMatricula = await database.Matriculas.findOne({
+                where:
+                {
+                    id: Number(matriculaId),
+                    estudante_id: Number(estudanteId)
+                }
+            })
+            return res.status(200).json(umaMatricula)
+        } catch (error) {
+            return res.send(500).json(error.message)
+        }
+    }
+
+    static async criaMatricula(req, res) {
+        const {estudanteId} = req.params
+        const novaMatricula = {...req.body, estudante_id: Number(estudanteId)}
+        try {
+            const novaMatriculaCriada = await database.Matriculas.create(novaMatricula)
+            return res.status(200).json(novaMatriculaCriada);
         } catch(error) {
+            res.status(500).json(error.message)
+        }
+    }
+
+    static async atualizaMatricula(req, res) {
+        const { estudanteId, matriculaId } = req.params
+        const novasInfos = req.body
+        try {
+            await database.Matriculas.update(novasInfos, { where: 
+                { 
+                    id: Number(matriculaId),
+                    estudante_id: Number(estudanteId)
+
+                 } })// atualizar banco retorna booleano
+            const matriculaAtualizada = await database.Matriculas.findOne({
+                where: {
+                    id: Number(matriculaId)
+                }
+            })// encontrar a matricula atualizada no banco
+            return res.status(200).json(matriculaAtualizada)
+        } catch (error) {
+            return res.status(500).json(error.message);
+        }
+    }
+
+    static async deletarMatricula(req, res) {
+        const { estudanteId, matriculaId } = req.params
+        try {
+            await database.Matriculas.destroy({
+                where: {
+                    id: Number(matriculaId)
+                }
+            })
+            return res.status(200).send(`${matriculaId} foi deletada com sucesso`)
+        } catch (error) {
             return res.status(500).json(error.message);
         }
     }
