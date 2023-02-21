@@ -1,11 +1,18 @@
 const database = require('../models')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 
 class TurmaController {
     static async getAllTurmas(req, res) {
+        const {data_inicial, data_final} = req.query
+        const where = {}
+        data_inicial || data_final ? where.data_inicio = {} : null
+        data_inicial ? where.data_inicio[Op.gte] = data_inicial : null
+        data_final ? where.data_inicio[Op.lte] = data_final : null 
         try {
-            const todasTurmas = await database.Turmas.findAll();
+            const todasTurmas = await database.Turmas.findAll({ where });
             return res.status(200).json(todasTurmas)
-        } catch(error) {
+        } catch (error) {
             return res.status(500).json(error.message)
         }
     }
@@ -47,13 +54,15 @@ class TurmaController {
     }
 
     static async deletarTurma(req, res) {
-        const {id} = req.params
+        const { id } = req.params
         try {
-            await database.Turmas.destroy({where: {
-                id: Number(id)
-            }})
+            await database.Turmas.destroy({
+                where: {
+                    id: Number(id)
+                }
+            })
             return res.status(200).send(`${id} foi deletada com sucesso`)
-        } catch(error) {
+        } catch (error) {
             return res.status(500).json(error.message);
         }
     }

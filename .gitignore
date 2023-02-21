@@ -1,3 +1,4 @@
 node_modules
 arquivos_base
 package-lock.json
+*.yaml
